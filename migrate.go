@@ -13,6 +13,7 @@ func NewMigrate(from *TableContext, paginationLimit int) *MigrateContext {
 	return &MigrateContext{
 		From:            from,
 		RowProcessors:   make([]ProcessRowFunc, 0),
+		Defers:          make([]func(), 0),
 		PaginationLimit: paginationLimit,
 	}
 }
@@ -21,12 +22,18 @@ func NewMigrate(from *TableContext, paginationLimit int) *MigrateContext {
 type MigrateContext struct {
 	From            *TableContext
 	RowProcessors   []ProcessRowFunc
+	Defers          []func()
 	PaginationLimit int
 	SelectStmt      *sql.Stmt
 }
 
 func (x *MigrateContext) WithProcessor(processors ...ProcessRowFunc) *MigrateContext {
 	x.RowProcessors = append(x.RowProcessors, processors...)
+	return x
+}
+
+func (x *MigrateContext) WithDefer(defers ...func()) *MigrateContext {
+	x.Defers = append(x.Defers, defers...)
 	return x
 }
 
@@ -98,6 +105,9 @@ rowLoop:
 // Migrate kicks off the process of copying from the source table to the destination table.
 func Migrate(c *MigrateContext) error {
 	defer func(c *MigrateContext) {
+		for _, d := range c.Defers {
+			d()
+		}
 		if c.SelectStmt != nil {
 			c.SelectStmt.Close()
 			c.SelectStmt = nil
