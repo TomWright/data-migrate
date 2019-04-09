@@ -3,6 +3,7 @@ package data_migrate
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -41,24 +42,26 @@ func InsertRowFunc(insertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 	}
 }
 
-func UpsertRowFunc(insertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
+func UpsertRowFunc(upsertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 	return func(row *Row) error {
 		var err error
-		if insertStmt == nil {
+		if upsertStmt == nil {
 			insertColumns := make([]string, len(row.Columns))
 			upsertColumns := make([]string, len(row.Columns))
 			for k, c := range row.Columns {
 				insertColumns[k] = c.Column
 				upsertColumns[k] = c.Column + " = ?"
 			}
-			insertStmt, err = to.DB.Prepare(fmt.Sprintf(
+			upsertSQL := fmt.Sprintf(
 				"INSERT INTO %s.%s (%s) VALUES(%s) ON DUPLICATE KEY UPDATE %s",
 				to.DBName,
 				to.Table,
 				strings.Join(insertColumns, ", "),
 				strings.TrimSuffix(strings.Repeat("?, ", len(insertColumns)), ", "),
 				strings.Join(upsertColumns, ", "),
-			))
+			)
+			log.Println(upsertColumns)
+			upsertStmt, err = to.DB.Prepare(upsertSQL)
 			if err != nil {
 				return err
 			}
@@ -74,7 +77,9 @@ func UpsertRowFunc(insertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 			binds[k] = v.Value
 		}
 
-		_, err = insertStmt.Exec(binds...)
+		log.Println(binds)
+
+		_, err = upsertStmt.Exec(binds...)
 		if err != nil {
 			return err
 		}
