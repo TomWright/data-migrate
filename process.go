@@ -74,7 +74,7 @@ func UpsertRowFunc(upsertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 		}
 		// upsert binds
 		for k, v := range row.Columns {
-			binds[k] = v.Value
+			binds[4+k] = v.Value
 		}
 
 		log.Println(binds)
