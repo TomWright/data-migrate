@@ -3,7 +3,6 @@ package data_migrate
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -60,7 +59,6 @@ func UpsertRowFunc(upsertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 				strings.TrimSuffix(strings.Repeat("?, ", len(insertColumns)), ", "),
 				strings.Join(upsertColumns, ", "),
 			)
-			log.Println(upsertColumns)
 			upsertStmt, err = to.DB.Prepare(upsertSQL)
 			if err != nil {
 				return err
@@ -76,8 +74,6 @@ func UpsertRowFunc(upsertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 		for k, v := range row.Columns {
 			binds[4+k] = v.Value
 		}
-
-		log.Println(binds)
 
 		_, err = upsertStmt.Exec(binds...)
 		if err != nil {
