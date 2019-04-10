@@ -44,9 +44,10 @@ func InsertRowFunc(insertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 func UpsertRowFunc(upsertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 	return func(row *Row) error {
 		var err error
+		colCount := len(row.Columns)
 		if upsertStmt == nil {
-			insertColumns := make([]string, len(row.Columns))
-			upsertColumns := make([]string, len(row.Columns))
+			insertColumns := make([]string, colCount)
+			upsertColumns := make([]string, colCount)
 			for k, c := range row.Columns {
 				insertColumns[k] = c.Column
 				upsertColumns[k] = c.Column + " = ?"
@@ -65,14 +66,14 @@ func UpsertRowFunc(upsertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 			}
 		}
 
-		binds := make([]interface{}, len(row.Columns)*2)
+		binds := make([]interface{}, colCount*2)
 		// insert binds
 		for k, v := range row.Columns {
 			binds[k] = v.Value
 		}
 		// upsert binds
 		for k, v := range row.Columns {
-			binds[4+k] = v.Value
+			binds[colCount+k] = v.Value
 		}
 
 		_, err = upsertStmt.Exec(binds...)
