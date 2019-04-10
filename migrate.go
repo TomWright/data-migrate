@@ -40,7 +40,7 @@ func (x *MigrateContext) WithDefer(defers ...func()) *MigrateContext {
 func migratePage(c *MigrateContext, offset int) (bool, error) {
 	var err error
 	if c.SelectStmt == nil {
-		c.SelectStmt, err = c.From.DB.Prepare(fmt.Sprintf("SELECT * FROM %s.%s LIMIT ? OFFSET ?", c.From.DBName, c.From.Table))
+		c.SelectStmt, err = c.From.DB.Prepare(fmt.Sprintf("SELECT * FROM `%s`.`%s` LIMIT ? OFFSET ?", c.From.DBName, c.From.Table))
 		if err != nil {
 			return false, err
 		}

@@ -16,7 +16,7 @@ func InsertRowFunc(insertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 				insertColumns[k] = c.Column
 			}
 			insertStmt, err = to.DB.Prepare(fmt.Sprintf(
-				"INSERT INTO %s.%s (%s) VALUES(%s)",
+				"INSERT INTO `%s`.`%s` (%s) VALUES(%s)",
 				to.DBName,
 				to.Table,
 				strings.Join(insertColumns, ", "),
@@ -52,7 +52,7 @@ func UpsertRowFunc(upsertStmt *sql.Stmt, to *TableContext) ProcessRowFunc {
 				upsertColumns[k] = c.Column + " = ?"
 			}
 			upsertSQL := fmt.Sprintf(
-				"INSERT INTO %s.%s (%s) VALUES(%s) ON DUPLICATE KEY UPDATE %s",
+				"INSERT INTO `%s`.`%s` (%s) VALUES(%s) ON DUPLICATE KEY UPDATE %s",
 				to.DBName,
 				to.Table,
 				strings.Join(insertColumns, ", "),
