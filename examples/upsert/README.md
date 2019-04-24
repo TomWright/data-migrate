@@ -2,7 +2,7 @@
 
 Select all rows from `old_db.persons` and insert them into `new_db.users`.
 
-If a user already exists in `old_db.persons`, the user in `new_db.users` will be updated.
+If a user from `old_db.persons` already exists in `new_db.users`, the user will be updated.
 
 ## Usage
 Compile the executable:
